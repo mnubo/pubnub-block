@@ -1,0 +1,27 @@
+{
+  "name": "mnubo-pubnub-block",
+  "version": "0.1.0",
+  "description": "ease the pubnub mnubo BLOCK creation",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "./build.py && eslint dist/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mnubo/pubnub-block.git"
+  },
+  "keywords": [
+    "mnubo",
+    "pubnub"
+  ],
+  "author": "David Francoeur",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mnubo/pubnub-block/issues"
+  },
+  "homepage": "https://github.com/mnubo/pubnub-block#readme",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-mnubo": "^1.2.0"
+  }
+}

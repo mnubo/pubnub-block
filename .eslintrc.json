@@ -1,0 +1,14 @@
+{
+    "extends": [
+        "mnubo"
+    ],
+
+    "rules": {
+        "camelcase": "off",
+        "max-len": [
+            "error",
+            100,
+            { "ignoreUrls": true }
+        ]
+    }
+}
