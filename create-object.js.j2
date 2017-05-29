@@ -1,0 +1,98 @@
+/**
+ * This Event Handler is expecting a message with at least those attributes:
+ * {
+ * 	"id": "deviceId5"
+ * }
+ */
+
+{{ jsrequire }}
+
+{{ jsauth }}
+
+/**
+ * Check if an object exists on the mnubo's platform
+ *
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#get-api-v3-objects-exists-x-device-id
+ * @param {string} objectsUri URI to the mnubo's Object API
+ * @param {object} token token retrieved from the mnubo's API
+ * @param {string} deviceId the device unique identifier
+ */
+function checkObjectExistence(objectsUri, token, deviceId) {
+    // eslint-disable-next-line
+    console.log('Checking if object exists on mnubo');
+
+    const existsUri = `${objectsUri}/exists/${deviceId}`;
+    const httpOptions = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.access_token}`
+        },
+    };
+
+    return XHR.fetch(existsUri, httpOptions).then((resp) => {
+        const body = JSON.parse(resp.body);
+        return body[deviceId];
+    });
+}
+
+/**
+ * Create a new object on the mnubo's platform
+ *
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-objects
+ * @param {string} objectsUri URI to the mnubo's Object API
+ * @param {object} token token retrieved from the mnubo's API
+ * @param {object} object object to create on the mnubo's platform
+ */
+function createObject(objectsUri, token, object) {
+    // eslint-disable-next-line
+    console.log('Creating object on mnubo');
+
+    const httpOptions = {
+        method: 'POST',
+        body: JSON.stringify(object),
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.access_token}`
+        },
+    };
+
+    return XHR.fetch(objectsUri, httpOptions);
+}
+
+function onRequest(request) {
+    /**
+     * Sandbox: 'https://rest.sandbox.mnubo.com'
+     * Production: 'https://rest.api.mnubo.com'
+     */
+    const baseUri = 'https://rest.sandbox.mnubo.com';
+
+    const authUri = `${baseUri}/oauth/token`;
+    const objectsUri = `${baseUri}/api/v3/objects`;
+
+    const clientId = '--';
+    const clientSecret = '--';
+
+    return retrieveAccessToken(authUri, clientId, clientSecret)
+        .then((token) => {
+            const device = request.message.id;
+            return checkObjectExistence(objectsUri, token, device).then((exists) => {
+                if (!exists) {
+                    const newObject = {
+                        x_device_id: device,
+                        x_object_type: 'object_type1',
+                        object_text_attribute: 'an object text attribute defined in the model'
+                    };
+                    return createObject(objectsUri, token, newObject);
+                }
+            });
+        }).then(() => {
+            return request.ok();
+        }).catch((e) => {
+            // eslint-disable-next-line
+            console.error(e);
+            return request.ok();
+        });
+}
+
+export default onRequest;
