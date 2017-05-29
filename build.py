@@ -18,7 +18,8 @@ def render_templates():
 
     files = [
         "post-events.js",
-        "create-object.js"
+        "create-object.js",
+        "create-owner.js"
     ]
     for file in files:
         filename = THIS_DIR + "/dist/" + file

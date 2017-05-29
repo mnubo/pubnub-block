@@ -1,0 +1,100 @@
+/**
+ * This Event Handler is expecting a message with at least those attributes:
+ * {
+ *     "username": "bob",
+ *     "password": "password"
+ * }
+ */
+
+{{ jsrequire }}
+
+{{ jsauth }}
+
+/**
+ * Check if an owner exists on the mnubo's platform
+ *
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#get-api-v3-owners-exists-username
+ * @param {string} ownersUri URI to the mnubo's Object API
+ * @param {object} token token retrieved from the mnubo's API
+ * @param {string} username the owner's username
+ */
+function checkOwnerExistence(ownersUri, token, username) {
+    // eslint-disable-next-line
+    console.log('Checking if owner exists on mnubo');
+
+    const existsUri = `${ownersUri}/exists/${username}`;
+    const httpOptions = {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.access_token}`
+        },
+    };
+
+    return XHR.fetch(existsUri, httpOptions).then((resp) => {
+        const body = JSON.parse(resp.body);
+        return body[username];
+    });
+}
+
+/**
+ * Create a new owner on the mnubo's platform
+ *
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-owners
+ * @param {string} ownersUri URI to the mnubo's Object API
+ * @param {object} token token retrieved from the mnubo's API
+ * @param {object} owner create on the mnubo's platform
+ */
+function createOwner(ownersUri, token, owner) {
+    // eslint-disable-next-line
+    console.log('Creating owner on mnubo');
+
+    const httpOptions = {
+        method: 'POST',
+        body: JSON.stringify(owner),
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token.access_token}`
+        },
+    };
+
+    return XHR.fetch(ownersUri, httpOptions);
+}
+
+function onRequest(request) {
+    /**
+     * Sandbox: 'https://rest.sandbox.mnubo.com'
+     * Production: 'https://rest.api.mnubo.com'
+     */
+    const baseUri = 'https://rest.sandbox.mnubo.com';
+
+    const authUri = `${baseUri}/oauth/token`;
+    const ownersUri = `${baseUri}/api/v3/owners`;
+
+    const clientId = '--';
+    const clientSecret = '--';
+
+    return retrieveAccessToken(authUri, clientId, clientSecret)
+        .then((token) => {
+            const username = request.message.username;
+            const password = request.message.password;
+            /* eslint-enable */
+            return checkOwnerExistence(ownersUri, token, username).then((exists) => {
+                if (!exists) {
+                    const newOwner = {
+                        username: username,
+                        x_password: password
+                    };
+                    return createOwner(ownersUri, token, newOwner);
+                }
+            });
+        }).then(() => {
+            return request.ok();
+        }).catch((e) => {
+            // eslint-disable-next-line
+            console.error(e);
+            return request.ok();
+        });
+}
+
+export default onRequest;
