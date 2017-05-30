@@ -11,8 +11,8 @@
  * }
  * https://smartobjects.mnubo.com/documentation/api_security.html#getting-your-access-token
  * @param {string} authUri URI to the mnubo OAuth server
- * @param {string} client your mnubo's client id
- * @param {string} secret your mnubo's client secret
+ * @param {string} clientId your mnubo's client id
+ * @param {string} clientSecret your mnubo's client secret
  */
 function fetchAccessToken(authUri, clientId, clientSecret) {
     // eslint-disable-next-line
@@ -41,8 +41,8 @@ function fetchAccessToken(authUri, clientId, clientSecret) {
  * is used to get a new one (it is then stored in the cache).
  *
  * @param {string} authUri URI to the mnubo OAuth server
- * @param {string} client your mnubo's client id
- * @param {string} secret your mnubo's client secret
+ * @param {string} clientId your mnubo's client id
+ * @param {string} clientSecret your mnubo's client secret
  */
 function retrieveAccessToken(authUri, clientId, clientSecret) {
     const fetchAndStoreAccessToken = () => {

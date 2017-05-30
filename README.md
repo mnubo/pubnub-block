@@ -13,8 +13,9 @@ use the mnubo's SmartObjects platform.
 
 # Examples
 
-* post-events.js - on incoming message post an event to mnubo
-* create-object.js - on incoming message create an object if it does not exist
+* postEvents.js - on incoming message post an event to mnubo
+* createObject.js - on incoming message create an object if it does not exist
+* createOwner.js - on incoming message create an object if it does not exist
 
 
 Note:

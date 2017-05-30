@@ -1,8 +1,9 @@
 /**
  * This Event Handler is expecting a message with at least those attributes:
  * {
- *     "username": "bob",
- *     "password": "password"
+ * 	"timestamp": "2017-05-29T14:53:12Z",
+ * 	"id": "deviceId8",
+ * 	"status": "online"
  * }
  */
 
@@ -28,8 +29,8 @@ const basicAuth = require('codec/auth');
  * }
  * https://smartobjects.mnubo.com/documentation/api_security.html#getting-your-access-token
  * @param {string} authUri URI to the mnubo OAuth server
- * @param {string} client your mnubo's client id
- * @param {string} secret your mnubo's client secret
+ * @param {string} clientId your mnubo's client id
+ * @param {string} clientSecret your mnubo's client secret
  */
 function fetchAccessToken(authUri, clientId, clientSecret) {
     // eslint-disable-next-line
@@ -58,8 +59,8 @@ function fetchAccessToken(authUri, clientId, clientSecret) {
  * is used to get a new one (it is then stored in the cache).
  *
  * @param {string} authUri URI to the mnubo OAuth server
- * @param {string} client your mnubo's client id
- * @param {string} secret your mnubo's client secret
+ * @param {string} clientId your mnubo's client id
+ * @param {string} clientSecret your mnubo's client secret
  */
 function retrieveAccessToken(authUri, clientId, clientSecret) {
     const fetchAndStoreAccessToken = () => {
@@ -89,54 +90,35 @@ function retrieveAccessToken(authUri, clientId, clientSecret) {
 }
 
 /**
- * Check if an owner exists on the mnubo's platform
+ * Send events to the mnubo's API
  *
- * https://smartobjects.mnubo.com/documentation/api_ingestion.html#get-api-v3-owners-exists-username
- * @param {string} ownersUri URI to the mnubo's Object API
+ * An array of event looks like this:
+ * [
+ *   {
+ *       "x_object":{"x_device_id":"vin1234999"},
+ *       "x_event_type":"fooevent",
+ *       "footimeseries": 34
+ *   }
+ * ]
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-events
+ * @param {string} eventsUri URI to the mnubo's Event API
  * @param {object} token token retrieved from the mnubo's API
- * @param {string} username the owner's username
+ * @param {array} events an array of events to send to the mnubo's API
  */
-function checkOwnerExistence(ownersUri, token, username) {
+function sendEvents(eventsUri, token, events) {
     // eslint-disable-next-line
-    console.log('Checking if owner exists on mnubo');
-
-    const existsUri = `${ownersUri}/exists/${username}`;
-    const httpOptions = {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token.access_token}`
-        },
-    };
-
-    return XHR.fetch(existsUri, httpOptions).then((resp) => {
-        const body = JSON.parse(resp.body);
-        return body[username];
-    });
-}
-
-/**
- * Create a new owner on the mnubo's platform
- *
- * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-owners
- * @param {string} ownersUri URI to the mnubo's Object API
- * @param {object} token token retrieved from the mnubo's API
- * @param {object} owner create on the mnubo's platform
- */
-function createOwner(ownersUri, token, owner) {
-    // eslint-disable-next-line
-    console.log('Creating owner on mnubo');
+    console.log('Sending events to mnubo API');
 
     const httpOptions = {
         method: 'POST',
-        body: JSON.stringify(owner),
+        body: JSON.stringify(events),
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token.access_token}`
         },
     };
 
-    return XHR.fetch(ownersUri, httpOptions);
+    return XHR.fetch(eventsUri, httpOptions);
 }
 
 function onRequest(request) {
@@ -147,25 +129,27 @@ function onRequest(request) {
     const baseUri = 'https://rest.sandbox.mnubo.com';
 
     const authUri = `${baseUri}/oauth/token`;
-    const ownersUri = `${baseUri}/api/v3/owners`;
+    const eventsUri = `${baseUri}/api/v3/events`;
 
     const clientId = '--';
     const clientSecret = '--';
 
     return retrieveAccessToken(authUri, clientId, clientSecret)
         .then((token) => {
-            const username = request.message.username;
-            const password = request.message.password;
-            /* eslint-enable */
-            return checkOwnerExistence(ownersUri, token, username).then((exists) => {
-                if (!exists) {
-                    const newOwner = {
-                        username: username,
-                        x_password: password
-                    };
-                    return createOwner(ownersUri, token, newOwner);
+            const device = request.message.id;
+            const timestamp = request.message.timestamp;
+            const status = request.message.status;
+
+            const events = [
+                {
+                    x_object: { x_device_id: device },
+                    x_event_type: 'event_type1',
+                    x_timestamp: timestamp,
+                    ts_text_attribute: status
                 }
-            });
+            ];
+
+            return sendEvents(eventsUri, token, events);
         }).then(() => {
             return request.ok();
         }).catch((e) => {
