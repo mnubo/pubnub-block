@@ -4,7 +4,7 @@
   "description": "ease the pubnub mnubo BLOCK creation",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "./build.py && eslint dist/*.js"
+    "build": "node build.js && eslint dist/*.js"
   },
   "repository": {
     "type": "git",
@@ -21,7 +21,9 @@
   },
   "homepage": "https://github.com/mnubo/pubnub-block#readme",
   "devDependencies": {
+    "async-file": "^2.0.2",
     "eslint": "^3.19.0",
-    "eslint-config-mnubo": "^1.2.0"
+    "eslint-config-mnubo": "^1.2.0",
+    "mustache": "^2.3.0"
   }
 }

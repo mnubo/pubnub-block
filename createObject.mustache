@@ -1,28 +1,27 @@
 /**
  * This Event Handler is expecting a message with at least those attributes:
  * {
- *     "username": "bob",
- *     "password": "password"
+ * 	"id": "deviceId5"
  * }
  */
 
-{{ jsrequire }}
+{{{ jsrequire }}}
 
-{{ jsauth }}
+{{{ jsauth }}}
 
 /**
- * Check if an owner exists on the mnubo's platform
+ * Check if an object exists on the mnubo's platform
  *
- * https://smartobjects.mnubo.com/documentation/api_ingestion.html#get-api-v3-owners-exists-username
- * @param {string} ownersUri URI to the mnubo's Object API
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#get-api-v3-objects-exists-x-device-id
+ * @param {string} objectsUri URI to the mnubo's Object API
  * @param {object} token token retrieved from the mnubo's API
- * @param {string} username the owner's username
+ * @param {string} deviceId the device unique identifier
  */
-function checkOwnerExistence(ownersUri, token, username) {
+function checkObjectExistence(objectsUri, token, deviceId) {
     // eslint-disable-next-line
-    console.log('Checking if owner exists on mnubo');
+    console.log('Checking if object exists on mnubo');
 
-    const existsUri = `${ownersUri}/exists/${username}`;
+    const existsUri = `${objectsUri}/exists/${deviceId}`;
     const httpOptions = {
         method: 'GET',
         headers: {
@@ -33,32 +32,32 @@ function checkOwnerExistence(ownersUri, token, username) {
 
     return XHR.fetch(existsUri, httpOptions).then((resp) => {
         const body = JSON.parse(resp.body);
-        return body[username];
+        return body[deviceId];
     });
 }
 
 /**
- * Create a new owner on the mnubo's platform
+ * Create a new object on the mnubo's platform
  *
- * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-owners
- * @param {string} ownersUri URI to the mnubo's Object API
+ * https://smartobjects.mnubo.com/documentation/api_ingestion.html#post-api-v3-objects
+ * @param {string} objectsUri URI to the mnubo's Object API
  * @param {object} token token retrieved from the mnubo's API
- * @param {object} owner create on the mnubo's platform
+ * @param {object} object object to create on the mnubo's platform
  */
-function createOwner(ownersUri, token, owner) {
+function createObject(objectsUri, token, object) {
     // eslint-disable-next-line
-    console.log('Creating owner on mnubo');
+    console.log('Creating object on mnubo');
 
     const httpOptions = {
         method: 'POST',
-        body: JSON.stringify(owner),
+        body: JSON.stringify(object),
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token.access_token}`
         },
     };
 
-    return XHR.fetch(ownersUri, httpOptions);
+    return XHR.fetch(objectsUri, httpOptions);
 }
 
 function onRequest(request) {
@@ -69,23 +68,22 @@ function onRequest(request) {
     const baseUri = 'https://rest.sandbox.mnubo.com';
 
     const authUri = `${baseUri}/oauth/token`;
-    const ownersUri = `${baseUri}/api/v3/owners`;
+    const objectsUri = `${baseUri}/api/v3/objects`;
 
     const clientId = '--';
     const clientSecret = '--';
 
     return retrieveAccessToken(authUri, clientId, clientSecret)
         .then((token) => {
-            const username = request.message.username;
-            const password = request.message.password;
-            /* eslint-enable */
-            return checkOwnerExistence(ownersUri, token, username).then((exists) => {
+            const device = request.message.id;
+            return checkObjectExistence(objectsUri, token, device).then((exists) => {
                 if (!exists) {
-                    const newOwner = {
-                        username: username,
-                        x_password: password
+                    const newObject = {
+                        x_device_id: device,
+                        x_object_type: 'object_type1',
+                        object_text_attribute: 'an object text attribute defined in the model'
                     };
-                    return createOwner(ownersUri, token, newOwner);
+                    return createObject(objectsUri, token, newObject);
                 }
             });
         }).then(() => {
