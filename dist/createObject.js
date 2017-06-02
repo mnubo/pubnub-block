@@ -5,6 +5,9 @@
  * }
  */
 
+const clientId = 'CHANGE ME';
+const clientSecret = 'CHANGE ME';
+
 // require xhr
 const XHR = require('xhr');
 
@@ -147,9 +150,6 @@ function onRequest(request) {
 
     const authUri = `${baseUri}/oauth/token`;
     const objectsUri = `${baseUri}/api/v3/objects`;
-
-    const clientId = '--';
-    const clientSecret = '--';
 
     return retrieveAccessToken(authUri, clientId, clientSecret)
         .then((token) => {

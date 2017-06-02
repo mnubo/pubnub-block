@@ -7,6 +7,8 @@
  * }
  */
 
+{{{ token }}}
+
 {{{ jsrequire }}}
 
 {{{ jsauth }}}
@@ -52,9 +54,6 @@ function onRequest(request) {
 
     const authUri = `${baseUri}/oauth/token`;
     const eventsUri = `${baseUri}/api/v3/events`;
-
-    const clientId = '--';
-    const clientSecret = '--';
 
     return retrieveAccessToken(authUri, clientId, clientSecret)
         .then((token) => {

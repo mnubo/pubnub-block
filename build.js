@@ -7,10 +7,12 @@ const mustache = require('mustache');
 
     const jsrequire = await af.readFile(`${cwd}/require.mustache`, 'utf8');
     const jsauth = await af.readFile(`${cwd}/auth.mustache`, 'utf8');
+    const token = await af.readFile(`${cwd}/token.mustache`, 'utf8');
 
     const data = {
         jsrequire,
-        jsauth
+        jsauth,
+        token
     };
 
     const files = [
