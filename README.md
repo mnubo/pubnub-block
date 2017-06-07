@@ -22,3 +22,16 @@ Note:
 -----
 PubNub has a limit of 3 external calls per BLOCK, if you want more, you can request
 it [here](https://support.pubnub.com/support/solutions/articles/14000046950-why-am-i-receiving-execution-calls-exceeds-error-when-i-run-my-block-event-handler-).
+
+# Development
+
+PubNub BLOCKs are available from a catalog. When you install a BLOCK from the catalog, a
+template is used to generate an Event Handler for your code. Currently, mnubo offers 3
+different BLOCKs and their template is available from this repository: 
+[blocks-catalog-mnubo](https://github.com/pubnub/blocks-catalog-mnubo). The code was taken from
+the [dist](dist/) folder.
+
+If you want to update the code from a template:
+
+* make a pull request here (ensure clean code using build tools)
+* make a pull request on the PubNub repository
